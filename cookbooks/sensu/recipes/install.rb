@@ -45,3 +45,27 @@ end
 bash 'copy_SSL' do 
  code "cp /tmp/ssl_certs/sensu_ca/cacert.pem /tmp/ssl_certs/server/cert.pem /tmp/ssl_certs/server/key.pem /etc/rabbitmq/ssl"
 end
+
+file '/etc/rabbitmq/rabbitmq.config' do
+ content '[
+    {rabbit, [
+    {ssl_listeners, [5671]},
+    {ssl_options, [{cacertfile,"/etc/rabbitmq/ssl/cacert.pem"},
+                   {certfile,"/etc/rabbitmq/ssl/cert.pem"},
+                   {keyfile,"/etc/rabbitmq/ssl/key.pem"},
+                   {verify,verify_peer},
+                   {fail_if_no_peer_cert,true}]}
+    ]}
+  ]. '
+ mode '0755'
+ owner 'root'
+ group 'root'
+end
+
+service 'rabbitmq-server' do
+ action  :restart 
+end
+
+
+
+
