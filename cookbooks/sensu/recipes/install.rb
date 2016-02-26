@@ -19,6 +19,14 @@ bash 'sudo' do
  code "echo 'sensu ALL=(ALL:ALL) ALL' >> /etc/sudoers "
 end
 
+bash 'adding RabbitMQ sources Apt' do
+ code "echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee -a /etc/apt/sources.list.d/rabbitmq.list "
+end
+
+execute "apt-get-update" do
+  command "apt-get update"
+end
+
 package 'rabbitmq-server' do
  action :install
 end
@@ -78,16 +86,14 @@ service 'redis-server' do
  action [ :enable, :start ]
 end
 
-bash 'adding sources & keys to sensu' do
+bash 'adding sources & keys for sensu in Apt' do
  code "wget -q http://repos.sensuapp.org/apt/pubkey.gpg -O- | sudo apt-key add - ; echo 'deb http://repos.sensuapp.org/apt sensu main' | sudo tee -a /etc/apt/sources.list.d/sensu.list "
 end
 
-package 'sensu' do
- action :install
-end
-
-package 'uchiwa' do
- action :install
+%W("sensu" "uchiwa").each do |inst|
+ package "#{inst}" do
+  action :install
+ end
 end
 
 directory '/etc/sensu/ssl' do
@@ -171,16 +177,8 @@ file '/etc/sensu/uchiwa.json' do
  action :create
 end
 
-service 'sensu-server'  do
- action [ :enable, :start ]
-end
-
-service 'sensu-api' do
- action [ :enable, :start ]
-end
-
-service 'uchiwa' do
- action [ :enable, :start ]
-end
-
-
+%W("sensu-server" "sensu-api" "uchiwa").each do |srv|
+ service "#{srv}" do 
+  action [ :enable, :start ]
+ end
+end 
