@@ -1,6 +1,6 @@
 ##Before configuring client machine, copy the SSL certificates from server to client.
 ##scp /tmp/ssl_certs/client/cert.pem /tmp/ssl_certs/client/key.pem user@ip:/tmp
-include apt
+#include apt
 
 bash 'adding sources & keys to sensu' do
  code "wget -q http://repos.sensuapp.org/apt/pubkey.gpg -O- | sudo apt-key add - ; echo 'deb http://repos.sensuapp.org/apt sensu main' | sudo tee -a /etc/apt/sources.list.d/sensu.list "
@@ -10,8 +10,9 @@ execute "apt-get-update" do
   command "apt-get update"
 end
 
-package 'sensu' do
- action : install
+apt_package  'sensu' do
+ action :install
+ options '--force-yes'
 end
 
 bash 'SSL_copy_sensu' do
